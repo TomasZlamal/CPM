@@ -16,7 +16,9 @@ public:
   enum class appStatus {
     login,
     home,
-    info
+    info,
+    addEntry,
+    showEntries
   };
   MyFrame(const wxString& title);
 private:
@@ -28,12 +30,16 @@ private:
   wxTextCtrl* inputText;
   bool keyIsShown;
 
+  void onCriticalError();
+
   void LoginOnSubmit(wxCommandEvent& evt);
   void LoginOnTextChanged(wxCommandEvent& evt);
   void LoginOnMore(wxCommandEvent& evt);
   void LoginOnShow(wxCommandEvent& evt);
 
   void HomeOnLoginButtonClicked(wxCommandEvent& evt);
+  void HomeOnAddEntryButtonClicked(wxCommandEvent& evt);
+  void HomeOnShowEntriesButtonClicked(wxCommandEvent& evt);
 
   void InfoOnBack(wxCommandEvent& evt);
 
@@ -42,4 +48,6 @@ private:
   void showLoginScreen();
   void showHomeScreen();
   void showInfoScreen();
+  void showAddEntryScreen();
+  void showEntriesScreen();
 };

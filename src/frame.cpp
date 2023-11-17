@@ -21,10 +21,7 @@ MyFrame::MyFrame(const wxString& title)
 void MyFrame::Refresh() {
   if (this->currentPanel) {
     if (!this->currentPanel->Destroy()) {
-      CreateStatusBar();
-      wxLogStatus("A critical error has occured, shutting down; Code DFF001");
-      Sleep(2000);
-      Close();
+      onCriticalError();
     }
   }
   switch (state) {
@@ -37,11 +34,18 @@ void MyFrame::Refresh() {
     case appStatus::info: {
       showInfoScreen();
     } break;
+    case appStatus::addEntry: {
+      showAddEntryScreen();
+    } break;
+    case appStatus::showEntries: {
+      showEntriesScreen();
+    } break;
+    default: {
+      onCriticalError();
+    } break;
   }
-  
-  // !!! important
-  this->Layout();
 }
+
 void MyFrame::showLoginScreen()
 {
   wxPanel* inputPanel = new wxPanel(this);
@@ -52,7 +56,7 @@ void MyFrame::showLoginScreen()
   wxStaticText* remaining = new wxStaticText(inputPanel, wxID_ANY, "16 characters remaining", wxPoint(270, 340));
   wxTextCtrl* input = new wxTextCtrl(inputPanel, wxID_ANY, "", wxPoint(270, 170), wxSize(130, 20), wxTE_PASSWORD);
   wxButton* more = new wxButton(inputPanel, wxID_ANY, "More info", wxPoint(0, 0), wxSize(70, 40));
-  wxBitmap* icon = new wxBitmap("visibility_FILL0_wght400_GRAD0_opsz24.png", wxBITMAP_TYPE_PNG);
+  wxBitmap* icon = new wxBitmap("resources/visibility_FILL0_wght400_GRAD0_opsz24.png", wxBITMAP_TYPE_PNG);
   wxBitmapBundle bundle{ *icon };
   wxBitmapButton* show = new wxBitmapButton(inputPanel, wxID_ANY, bundle, wxPoint(410, 170), wxSize(30, 20));
   inputText = input;
@@ -62,6 +66,8 @@ void MyFrame::showLoginScreen()
   input->Bind(wxEVT_TEXT, &MyFrame::LoginOnTextChanged, this);
   more->Bind(wxEVT_BUTTON, &MyFrame::LoginOnMore, this);
   show->Bind(wxEVT_BUTTON, &MyFrame::LoginOnShow, this);
+  // !!! important
+  this->Layout();
 }
 
 void MyFrame::showHomeScreen()
@@ -69,10 +75,15 @@ void MyFrame::showHomeScreen()
   wxPanel* homePanel = new wxPanel(this);
   this->currentPanel = homePanel;
 
-  wxStaticText* homeText = new wxStaticText(homePanel, wxID_ANY, "This is the home page", wxPoint(270, 140));
   wxButton* button = new wxButton(homePanel, wxID_ANY, "Input a different key", wxPoint(0, 0), wxSize(180, 25));
+  wxButton* addEntryButton = new wxButton(homePanel, wxID_ANY, "Add an entry", wxPoint(230, 200), wxSize(180, 25));
+  wxButton* showEntriesButton = new wxButton(homePanel, wxID_ANY, "Show decrypted passwords", wxPoint(230, 225), wxSize(180, 25));
 
-  homePanel->Bind(wxEVT_BUTTON, &MyFrame::HomeOnLoginButtonClicked, this);
+  button->Bind(wxEVT_BUTTON, &MyFrame::HomeOnLoginButtonClicked, this);
+  addEntryButton->Bind(wxEVT_BUTTON, &MyFrame::HomeOnAddEntryButtonClicked, this);
+  showEntriesButton->Bind(wxEVT_BUTTON, &MyFrame::HomeOnShowEntriesButtonClicked, this);
+  // !!! important
+  this->Layout();
 }
 
 void MyFrame::showInfoScreen()
@@ -80,12 +91,41 @@ void MyFrame::showInfoScreen()
   wxPanel* infoPanel = new wxPanel(this);
   this->currentPanel = infoPanel;
 
+  // dynamic binding
   wxButton* back = new wxButton(infoPanel, wxID_ANY, "Back", wxPoint(0, 0), wxSize(70, 40));
   wxStaticText* Text1 = new wxStaticText(infoPanel, wxID_ANY, "Input your key that you used/will use for your password", wxPoint(100, 110));
   wxStaticText* Text2 = new wxStaticText(infoPanel, wxID_ANY, "If you input an incorrect key, the keys will get decrypted incorrectly", wxPoint(100, 130));
   wxStaticText* Text3 = new wxStaticText(infoPanel, wxID_ANY, "The standard I use requires you to enter a 16 character key, to ensure security.", wxPoint(100, 150));
 
   back->Bind(wxEVT_BUTTON, &MyFrame::InfoOnBack, this);
+  // !!! important
+  this->Layout();
+}
+
+void MyFrame::showAddEntryScreen()
+{
+  wxPanel* addEntryPanel = new wxPanel(this);
+  this->currentPanel = addEntryPanel;
+
+  // !!! important
+  this->Layout();
+}
+
+void MyFrame::showEntriesScreen()
+{
+  wxPanel* showEntriesPanel = new wxPanel(this);
+  this->currentPanel = showEntriesPanel;
+
+  // !!! important
+  this->Layout();
+}
+
+void MyFrame::onCriticalError()
+{
+  CreateStatusBar();
+  wxLogStatus("A critical error has occured, shutting down; Code DFF001");
+  Sleep(2000);
+  Close();
 }
 
 void MyFrame::LoginOnSubmit(wxCommandEvent& evt) {
@@ -110,6 +150,18 @@ void MyFrame::LoginOnTextChanged(wxCommandEvent& evt) {
 void MyFrame::HomeOnLoginButtonClicked(wxCommandEvent& evt)
 {
   state = appStatus::login;
+  Refresh();
+}
+
+void MyFrame::HomeOnAddEntryButtonClicked(wxCommandEvent& evt)
+{
+  state = appStatus::addEntry;
+  Refresh();
+}
+
+void MyFrame::HomeOnShowEntriesButtonClicked(wxCommandEvent& evt)
+{
+  state = appStatus::showEntries;
   Refresh();
 }
 
